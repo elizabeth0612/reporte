@@ -24,7 +24,49 @@ class WorkOrderController extends Controller
     {
         return view('workorder.index');
     }
-
+    public function updateImage(Request $request){
+        try {
+            // 1. Actualizar descripciones de imágenes ya guardadas
+            if ($request->has('imagenes_existentes')) {
+                foreach ($request->input('imagenes_existentes') as $id => $nuevaDescripcion) {
+                    \App\Models\WorkOrderDetailImage::where('id', $id)->update([
+                        'descripcion' => $nuevaDescripcion,
+                    ]);
+                }
+            }
+    
+            // 2. Subir y guardar nuevas imágenes
+            if ($request->hasFile('imagenes')) {
+                $imagenes = $request->file('imagenes');
+                $descripciones = $request->input('descripciones');
+    
+                foreach ($imagenes as $index => $imagen) {
+                    if ($imagen) {
+                        $imageName = time() . '_' . $imagen->getClientOriginalName();
+                        $imagen->move(storage_path('app/public/images/work_order_detail'), $imageName);
+    
+                        \App\Models\WorkOrderDetailImage::create([
+                            'work_order_detail_id' => $request->input('workOrderId'),
+                            'image_path' => 'images/work_order_detail/' . $imageName,
+                            'descripcion' => $descripciones[$index] ?? null,
+                        ]);
+                    }
+                }
+            }
+    
+            return response()->json([
+                'success' => true,
+                'message' => '¡Ha sido actualizado con éxito!',
+            ]);
+        } catch (\Exception $e) {
+            // Capturar cualquier excepción lanzada durante el proceso
+            return response()->json([
+                'success' => false,
+                'message' => 'Ha ocurrido un error al actualizar las imágenes: ' . $e->getMessage(),
+            ]);
+        }
+    }
+    
     /**
      * Show the form for creating a new resource.
      */

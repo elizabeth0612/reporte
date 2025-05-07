@@ -8,7 +8,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
         </h2>
     </x-slot>
-    <div class="max-w-7xl  mx-auto px-4 py-12">
+    <div class="max-w-6xl  mx-auto px-4 py-12">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
             <h2 class="text-2xl font-semibold text-gray-800">Registro de tareas</h2>
         
@@ -184,12 +184,17 @@
     </div>
     <!-- Modal IMAGENES-->
 <div id="modalImages" class="fixed inset-0 z-50 hidden bg-gray-500 bg-opacity-75 flex justify-center items-center">
+
     <div class="bg-white rounded-lg shadow-lg  p-6">
+        <div class="flex justify-between items-center border-b  sticky top-0 bg-white">
+            <h2 class="text-xl font-semibold">Imagenes del Trabajo</h2>
+            <button onclick="closeModal('modalImages')" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+        </div>
         <form id="formWorkOrderImages" class="space-y-4">
+            @csrf
             <!-- ID del Trabajo -->
             <div class="form-group">
-                <label for="workOrderId" class="block text-sm font-medium text-gray-700">ID del Trabajo</label>
-                <input type="text" id="workOrderId" name="workOrderId" readonly 
+                <input type="hidden" id="workOrderId" name="workOrderId" readonly 
                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
             <div class="imagen-bloque">
@@ -204,16 +209,15 @@
             </div>
 
             <!-- Botón para guardar cambios -->
-            <div class="form-group">
-                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+            <div class="flex justify-end space-x-2 px-6 py-4 border-t sticky bottom-0 bg-white">
+                <button type="submit" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
                     Guardar Cambios
                 </button>
+                <button type="button" onclick="closeModal('modalImages')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Cerrar</button>
+
             </div>
         </form>
         <!-- Cerrar el modal -->
-        <button type="button" class="absolute top-0 right-0 p-2 text-gray-600 hover:text-gray-900" onclick="closeModal()">
-            <i class="bi bi-x-circle-fill"></i>
-        </button>
     </div>
 </div>
     
@@ -253,17 +257,20 @@
 
         images.forEach(image => {
             const wrapper = document.createElement("div");
-            wrapper.className = "flex flex-col items-center space-y-2 relative";
-            wrapper.setAttribute("data-image-id", image.id); // Para facilitar la eliminación
+            wrapper.className = "flex flex-col space-y-2 relative";
+            wrapper.setAttribute("data-image-id", image.id);
 
             const imgElement = document.createElement("img");
             imgElement.src = `/storage/${image.image_path}`;
             imgElement.alt = `Imagen de trabajo ${id}`;
-            imgElement.className = "w-32 h-32 object-cover rounded-md shadow";
+            imgElement.className = "w-full h-20 object-cover rounded shadow";
 
-            const description = document.createElement("p");
-            description.className = "text-sm text-center text-gray-600";
-            description.textContent = image.descripcion || "Sin descripción";
+            const textarea = document.createElement("textarea");
+            textarea.name = `imagenes_existentes[${image.id}]`;
+            textarea.rows = 2;
+            textarea.placeholder = "Escribe una descripción...";
+            textarea.className = "w-full border rounded p-1 text-sm resize-none";
+            textarea.value = image.descripcion || "";
 
             const deleteBtn = document.createElement("button");
             deleteBtn.innerHTML = "X";
@@ -273,10 +280,11 @@
             deleteBtn.onclick = () => deleteImage(image.id, wrapper);
 
             wrapper.appendChild(imgElement);
-            wrapper.appendChild(description);
+            wrapper.appendChild(textarea);
             wrapper.appendChild(deleteBtn);
             imageContainer.appendChild(wrapper);
         });
+
     } catch (error) {
         console.error("Error obteniendo las imágenes:", error);
     }
@@ -381,7 +389,7 @@ async function deleteImage(imageId, wrapperElement) {
                 <td class="px-3 py-1 whitespace-nowrap text-sx "> 
                     <button type="button" class="text-green-600 hover:text-green-900"
                         onclick="save(${trabajo.id})">
-                        <i class="bi bi-save"></i> Save
+                        <i class="bi bi-save"></i>
                     </button>
                      <button type="submit" class="text-red-600 hover:text-red-900"
                         onclick="destroy(${trabajo.id})">
@@ -389,7 +397,7 @@ async function deleteImage(imageId, wrapperElement) {
                     </button>
                     <button type="button" class="text-red-600 hover:text-red-900"
                         onclick="addImage(${trabajo.id})">
-                        <i class="bi bi-plus-circle-fill"></i>
+                        <i class="bi bi-image"></i>
                     </button>
                 </td>
             `;
@@ -474,31 +482,32 @@ async function deleteImage(imageId, wrapperElement) {
         });
     }
     function addImageWork(event) {
-        const preview = document.getElementById('imageContainer');
-        preview.innerHTML = ''; // Limpiar vistas previas anteriores
+    const preview = document.getElementById('imageContainer');
+    // preview.innerHTML = ''; // NO BORRAR las vistas previas anteriores
 
-        const files = event.target.files;
-        if (!files.length) return;
+    const files = event.target.files;
+    if (!files.length) return;
 
-        Array.from(files).forEach((file, index) => {
-            if (!file.type.startsWith('image/')) return;
+    Array.from(files).forEach((file, index) => {
+        if (!file.type.startsWith('image/')) return;
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const container = document.createElement('div');
-                container.className = 'mb-4 p-2 border rounded bg-gray-50';
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const container = document.createElement('div');
+            container.className = 'mb-4 p-2 border rounded bg-gray-50';
 
-                container.innerHTML = `
-                    <img src="${e.target.result}" class="w-full h-20 object-cover rounded shadow mb-2">
-                    <label class="block text-sm text-gray-700 mb-1">Descripción de la imagen:</label>
-                    <textarea name="descripciones[]" rows="2" class="w-full border rounded p-1 text-sm resize-none" placeholder="Escribe una descripción para la imagen ${index + 1}"></textarea>
-                `;
+            container.innerHTML = `
+                <img src="${e.target.result}" class="w-full h-20 object-cover rounded shadow mb-2">
+                <label class="block text-sm text-gray-700 mb-1">Descripción de la imagen:</label>
+                <textarea name="descripciones[]" rows="2" class="w-full border rounded p-1 text-sm resize-none" placeholder="Escribe una descripción para la imagen"></textarea>
+            `;
 
-                preview.appendChild(container);
-            };
-            reader.readAsDataURL(file);
-        });
-        }
+            preview.appendChild(container);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
         document.addEventListener('DOMContentLoaded', () => {
             all();
 
@@ -566,7 +575,7 @@ async function deleteImage(imageId, wrapperElement) {
         e.preventDefault();
         let formData = new FormData(this);
 
-        fetch('{{ route('workorders.store') }}', {
+        fetch('{{ route('workorder.updateImage') }}', {
                 method: 'POST',
                 body: formData
             })
@@ -581,10 +590,14 @@ async function deleteImage(imageId, wrapperElement) {
                         icon: 'success',
                         title: '¡Éxito!',
                         text: data.message,
+                        position: 'top-end',
                         showConfirmButton: false,
-                        timer: 2000
+                        timer: 2000,
+                        customClass: {
+                            popup: 'text-sm p-2 w-64 rounded-md shadow-md'
+                        }
                     });
-                    document.getElementById('formOrder').reset();
+
                 }
             })
             .catch(error => {
