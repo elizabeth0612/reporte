@@ -96,7 +96,7 @@ class WorkOrderController extends Controller
         if (!$workOrder) {
             return abort(404, 'order no encontrada');
         }
-        $workOrderMaintenanceManager = workOrderMaintenanceManager::with('maintenanceManager')
+        $workOrderMaintenanceManager = WorkOrderMaintenanceManager::with('maintenanceManager')
         ->where('work_order_id', $id)
         ->get();
     
