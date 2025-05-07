@@ -7,12 +7,12 @@ use App\Models\MaintenanceManager;
 use App\Models\Supervisor;
 use App\Models\Worker;
 use App\Models\WorkOrder;
-use App\Models\WorkOrderMaintenanceManager;
 use App\Models\WorkOrderSupervisor;
 use App\Models\WorkOrderWorker;
 use Illuminate\Support\Facades\DB;
 use App\Models\WorkOrderDetailImage;
 use App\Models\WorkOrderDetail;
+use App\Models\WorkOrderMaintenanceManager;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class WorkOrderController extends Controller
@@ -34,17 +34,17 @@ class WorkOrderController extends Controller
                     ]);
                 }
             }
-    
+
             // 2. Subir y guardar nuevas imágenes
             if ($request->hasFile('imagenes')) {
                 $imagenes = $request->file('imagenes');
                 $descripciones = $request->input('descripciones');
-    
+
                 foreach ($imagenes as $index => $imagen) {
                     if ($imagen) {
                         $imageName = time() . '_' . $imagen->getClientOriginalName();
                         $imagen->move(storage_path('app/public/images/work_order_detail'), $imageName);
-    
+
                         \App\Models\WorkOrderDetailImage::create([
                             'work_order_detail_id' => $request->input('workOrderId'),
                             'image_path' => 'images/work_order_detail/' . $imageName,
@@ -53,7 +53,7 @@ class WorkOrderController extends Controller
                     }
                 }
             }
-    
+
             return response()->json([
                 'success' => true,
                 'message' => '¡Ha sido actualizado con éxito!',
@@ -66,7 +66,7 @@ class WorkOrderController extends Controller
             ]);
         }
     }
-    
+
     /**
      * Show the form for creating a new resource.
      */
@@ -76,7 +76,7 @@ class WorkOrderController extends Controller
         $supervisors = Supervisor::all();
         $workers = Worker::all();
 
-        
+
         return view('workorder.create',compact('maintenanceManagers','supervisors','workers'));
     }
     public function search(){
@@ -87,7 +87,7 @@ class WorkOrderController extends Controller
     }
     public function details($id){
         $workOrderDetail= WorkOrderDetail::where('work_order_id',$id)->get();
-        
+
         return response()->json($workOrderDetail);
 
     }
@@ -99,16 +99,15 @@ class WorkOrderController extends Controller
         $workOrderMaintenanceManager = WorkOrderMaintenanceManager::with('maintenanceManager')
         ->where('work_order_id', $id)
         ->get();
-    
+
         $workOrderSupervisor = WorkOrderSupervisor::with('supervisor')
             ->where('work_order_id', $id)
             ->get();
-        
+
         $workOrderWorker = WorkOrderWorker::with('worker')
             ->where('work_order_id', $id)
             ->get();
         $workOrderDetail = WorkOrderDetail::with('images')->where('work_order_id', $id)->get();
-        //dd($workOrder,$workOrderMaintenanceManager);
         $pdf = Pdf::loadView('workorder.pdf', compact('workOrder','workOrderMaintenanceManager','workOrderSupervisor','workOrderWorker','workOrderDetail'));
         return $pdf->stream('workorder.pdf');
     }
@@ -138,17 +137,17 @@ class WorkOrderController extends Controller
                 'herramientas' => $request->input('herramientas'),
                 'observaciones' => $request->input('observaciones'),
             ]);
-            
+
         // Si se suben imágenes, guardarlas
         if ($request->hasFile('imagenes')) {
             $imagenes = $request->file('imagenes');
             $descripciones = $request->input('descripciones');
-        
+
             foreach ($imagenes as $index => $imagen) {
                 if ($imagen) {
                     $imageName = time() . '_' . $imagen->getClientOriginalName();
                     $imagen->move(storage_path('app/public/images/work_order_detail'), $imageName);
-        
+
                     WorkOrderDetailImage::create([
                         'work_order_detail_id' => $WorkOrderDetail->id,
                         'image_path' => 'images/work_order_detail/' . $imageName,
@@ -157,11 +156,11 @@ class WorkOrderController extends Controller
                 }
             }
         }
-        
+
         return response()->json([
             'success' => true,
             'message' => '¡Ha sido registrado con éxito!',
-        ]);    
+        ]);
 
        } catch (\Exception $e) {
         //DB::rollBack();
@@ -172,7 +171,7 @@ class WorkOrderController extends Controller
         ], 500);
         }
     }
-           
+
 
     /**
      * Store a newly created resource in storage.
@@ -186,13 +185,13 @@ class WorkOrderController extends Controller
                 'empresa' => 'nullable|string',
                 'descripcion' => 'nullable|string',
 
-                
+
                 'supervisor_id' => 'nullable|array',
                 'supervisor_id.*' => 'exists:supervisors,id',
-            
+
                 'maintenance_manager_id' => 'nullable|array',
                 'maintenance_manager_id.*' => 'exists:maintenance_managers,id',
-            
+
                 'workers' => 'nullable|array',
                 'workers.*' => 'exists:workers,id',
             ]);
@@ -212,7 +211,7 @@ class WorkOrderController extends Controller
             if ($request->hasFile('imagen')) {
                 $imagen = $request->file('imagen');
                 $imageName = time() . '_' . $imagen->getClientOriginalName();
-                
+
                 // Mover la imagen a la carpeta correspondiente
                 $imagen->move(storage_path('app/public/images/logo'), $imageName);
 
@@ -248,8 +247,8 @@ class WorkOrderController extends Controller
                     ]);
                 }
             }
-            
-            
+
+
             //DB::commit();
             return response()->json([
                 'success' => true,
@@ -263,8 +262,8 @@ class WorkOrderController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-       
-        
+
+
     }
 
     /**
