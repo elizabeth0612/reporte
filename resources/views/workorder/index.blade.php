@@ -11,20 +11,20 @@
     <div class="max-w-6xl  mx-auto px-4 py-12">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
             <h2 class="text-2xl font-semibold text-gray-800">Registro de tareas</h2>
-        
+
             <form class="flex flex-col sm:flex-row sm:items-center text-xs gap-2" id="formBuscarPorFecha">
                 <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                     <label for="fecha_desde">Desde:</label>
                     <input type="date" name="fecha_desde" id="fecha_desde"
                         class="border border-gray-300 rounded-lg py-2 px-4 w-full sm:w-auto">
                 </div>
-        
+
                 <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                     <label for="fecha_hasta">Hasta:</label>
                     <input type="date" name="fecha_hasta" id="fecha_hasta"
                         class="border border-gray-300 rounded-lg py-2 px-4 w-full sm:w-auto">
                 </div>
-        
+
                 <button type="submit"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full sm:w-auto">
                     Buscar
@@ -34,10 +34,10 @@
                     Agregar
                 </a>
             </form>
-        
-           
+
+
         </div>
-        
+
         <!-- Mensajes de éxito o error -->
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
@@ -54,9 +54,9 @@
             <table class="min-w-full divide-y divide-gray-200 ">
                 <thead class="bg-gray-50">
                     <tr>
-                        
+
                         <th class="px-3 py-1 text-left text-xs  text-gray-500 uppercase tracking-wider">
-                            ORDEN DE TRABAJO 
+                            ORDEN DE TRABAJO
 
                         </th>
                         <th class="px-3 py-1 text-left text-xs  text-gray-500 uppercase tracking-wider">
@@ -77,18 +77,18 @@
         @endif --}}
     </div>
     <!-- Modal -->
-    
+
     <!-- Modal fondo oscuro -->
     <div id="ModalAdd" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <!-- Contenido del modal -->
         <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl mx-4 overflow-x-auto overflow-y-auto max-h-40">
-          
+
             <!-- Header -->
             <div class="flex justify-between items-center border-b px-6 py-4 sticky top-0 bg-white">
                 <h2 class="text-xl font-semibold">Agregar Nuevo Trabajo</h2>
                 <button onclick="closeModal('ModalAdd')" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
             </div>
-        
+
             <!-- Formulario -->
             <form id="formAddTrabajo" enctype="multipart/form-data">
                 @csrf
@@ -100,42 +100,42 @@
                         <label for="nro_trabajo" class="block text-sm  text-gray-700">Nro Trabajo</label>
                         <input type="text" id="nro_trabajo" name="nro_trabajo" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                     </div>
-        
+
                     <!-- Descripción -->
                     <div>
                         <label for="description" class="block text-sm  text-gray-700">Descripción</label>
                         <textarea id="descripcion" name="descripcion" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                     </div>
-        
+
                     <!-- Material Empleado -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="materiales" class="block text-sm  text-gray-700">Material Empleado</label>
                             <textarea id="materiales" name="material" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                         </div>
-        
+
                         <!-- Herramientas -->
                         <div>
                             <label for="herramientas" class="block text-sm  text-gray-700">Herramientas</label>
                             <textarea id="herramientas" name="herramientas" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                         </div>
                     </div>
-        
+
                     <!-- Observaciones -->
                     <div>
                         <label for="observaciones" class="block text-sm  text-gray-700">Observaciones</label>
                         <textarea id="observaciones" name="observaciones" rows="2" class="mt-1 block w-full  border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                     </div>
-        
+
                     <!-- Imágenes -->
                     <div class="imagen-bloque">
                         <input type="file" name="imagenes[]" accept="image/*" onchange="handleFileSelect(event)" multiple>
                       </div>
-        
+
                     <!-- Vista previa de imágenes -->
                     <div id="previewImagenes" class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4"></div>
                 </div>
-        
+
                 <!-- Footer -->
                 <div class="flex justify-end space-x-2 px-6 py-4 border-t sticky bottom-0 bg-white">
                     <button type="button" onclick="closeModal('ModalAdd')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Cerrar</button>
@@ -146,13 +146,13 @@
     </div>
     <div id="ModalDetails" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 overflow-y-auto max-h-[90vh]">
-            
+
             <!-- Header -->
             <div class="flex justify-between items-center border-b px-6 py-4">
                 <h2 class="text-xl font-semibold">Listado de Trabajos</h2>
                 <button onclick="closeModal('ModalDetails')" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
             </div>
-    
+
             <!-- Tabla de trabajos -->
             <div class="px-6 py-4">
                 <div class="overflow-x-auto overflow-y-auto max-h-96"> <!-- Ajusta el tamaño máximo según sea necesario -->
@@ -174,11 +174,84 @@
                     </table>
                 </div>
             </div>
-            
-            
+
+
             <!-- Footer -->
             <div class="flex justify-end space-x-2 px-6 py-4 border-t">
                 <button type="button" onclick="closeModal('ModalDetails')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    <div id="ModalEdit" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-5">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 overflow-y-auto max-h-[90vh] p-5">
+            <!-- Header -->
+            <div class="flex justify-between items-center border-b px-6 py-4">
+                <h2 class="text-xl font-semibold">Editar Orden de Trabajo</h2>
+                <button onclick="closeModal('ModalEdit')" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+            </div>
+            <form action="{{ route('workorders.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700" id="formOrder">
+                @csrf
+                <input type="hidden" id="work_order_id_update">
+                <div class="md:col-span-2">
+                    <label for="empresa" class="block font-medium mb-1">Empresa</label>
+                    <textarea id="empresa" name="empresa" rows="2"
+                              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 resize-none">{{ old('empresa') }}</textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="order_work" class="block font-medium mb-1">Orden de Trabajo</label>
+                    <textarea id="order_work" name="order_work" rows="2"
+                              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 resize-none">{{ old('order_work') }}</textarea>
+                </div>
+                <div>
+                    <label for="supervisor_id" class="block font-medium mb-1">Responsable</label>
+                    <select id="supervisor_id" name="supervisor_id[]"
+                            class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400" multiple>
+                        <option value="">-- Seleccionar --</option>
+                        <!-- Aquí agregas las opciones, por ejemplo, usando un bucle de Laravel -->
+                        @foreach ($supervisors as $supervisor)
+                            <option value="{{ $supervisor->id }}">{{ $supervisor->name }} {{ $supervisor->paternal_surname }} {{ $supervisor->maternal_surname }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="maintenance_manager_id" class="block font-medium mb-1">Jefe de mantenimiento</label>
+                    <select id="maintenance_manager_id" name="maintenance_manager_id[]"
+                            class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400" multiple>
+                        <option value="">-- Seleccionar --</option>
+                        <!-- Aquí agregas las opciones, por ejemplo, usando un bucle de Laravel -->
+                        @foreach ($maintenanceManagers as $manager)
+                            <option value="{{ $manager->id }}">{{ $manager->name }} {{ $manager->paternal_surname }} {{ $manager->maternal_surname }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="workers" class="block font-medium mb-1">Operarios</label>
+                    <select id="workers" name="workers[]"
+                            class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400" multiple>
+                        <option value="">-- Seleccionar --</option>
+                        <!-- Aquí agregas las opciones, por ejemplo, usando un bucle de Laravel -->
+                        @foreach ($workers as $worker)
+                            <option value="{{ $worker->id }}">{{ $worker->name }} {{ $worker->paternal_surname }} {{ $worker->maternal_surname }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="imagen-bloque">
+                    <input type="file" name="imagen" accept="image/*" onchange="handleFileSelect(event)">
+                </div>
+
+                <!-- Vista previa de la imagen -->
+                <div id="previewImagen" class="mt-4"></div>
+                <div class="md:col-span-2">
+                    <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-all duration-300">
+                        💾 Guardar
+                    </button>
+                </div>
+            </form>
+            <!-- Footer -->
+            <div class="flex justify-end space-x-2 px-6 py-4 border-t">
+                <button type="button" onclick="closeModal('ModalEdit')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Cerrar</button>
             </div>
         </div>
     </div>
@@ -194,7 +267,7 @@
             @csrf
             <!-- ID del Trabajo -->
             <div class="form-group">
-                <input type="hidden" id="workOrderId" name="workOrderId" readonly 
+                <input type="hidden" id="workOrderId" name="workOrderId" readonly
                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
             <div class="imagen-bloque">
@@ -220,8 +293,8 @@
         <!-- Cerrar el modal -->
     </div>
 </div>
-    
-    
+
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
@@ -321,8 +394,8 @@ async function deleteImage(imageId, wrapperElement) {
         if (!confirmation) return; // Si el usuario cancela, no hacer nada
 
         // Definir la URL para la solicitud DELETE
-        let url = `{{ route('workorders.destroy', ':id') }}`.replace(':id', id);
-        
+        let url = `{{ route('workorders.destroyWork', ':id') }}`.replace(':id', id);
+
         // Enviar la solicitud DELETE al servidor
         let response = await fetch(url, {
             method: 'DELETE',
@@ -336,7 +409,7 @@ async function deleteImage(imageId, wrapperElement) {
         if (response.ok) {
     // Buscar la fila correspondiente en el DOM usando el ID
     const trHijo = document.getElementById(`nro_trabajo_${id}`);
-    
+
     // Si la fila hijo existe, obtener su elemento padre (tr que la envuelve)
     if (trHijo) {
         const trPadre = trHijo.closest('tr');  // Busca el tr padre
@@ -358,7 +431,7 @@ async function deleteImage(imageId, wrapperElement) {
 
 
     async function details(id) {
-    try {
+        try {
         let url = `{{ route('workorder.details', ':id') }}`.replace(':id', id);
         let response = await fetch(url);
         let data = await response.json(); // Recibe los datos en JSON
@@ -386,7 +459,7 @@ async function deleteImage(imageId, wrapperElement) {
                 <td class="px-3 py-2 border">
                     <input type="text" value="${trabajo.observaciones}" id="observaciones_${trabajo.id}" />
                 </td>
-                <td class="px-3 py-1 whitespace-nowrap text-sx "> 
+                <td class="px-3 py-1 whitespace-nowrap text-sx ">
                     <button type="button" class="text-green-600 hover:text-green-900"
                         onclick="save(${trabajo.id})">
                         <i class="bi bi-save"></i>
@@ -401,14 +474,41 @@ async function deleteImage(imageId, wrapperElement) {
                     </button>
                 </td>
             `;
-            
+
             tbody.appendChild(tr);
         });
         document.getElementById("ModalDetails").classList.remove("hidden");
-    } catch (error) {
-        console.error("Error obteniendo los detalles:", error);
+        } catch (error) {
+            console.error("Error obteniendo los detalles:", error);
+        }
     }
-}
+    async function destroy(id) {
+            if (!confirm("¿Estás segura de eliminar esta Orden de Trabajo?")) return;
+
+            try {
+                let url = `/workorders/${id}`;
+                let response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Elimina la fila directamente del DOM
+                    alert("Trabajo eliminado exitosamente.");
+                    all();
+                } else {
+                    const error = await response.json();
+                    alert("Error al eliminar: " + (error.message || "Intenta nuevamente"));
+                }
+            } catch (error) {
+                console.error("Error eliminando el trabajo:", error);
+                alert("Ocurrió un error. Revisa la consola.");
+            }
+        }
+
         async function save(id) {
             try {
                 // Obtener los valores de los inputs
@@ -481,6 +581,88 @@ async function deleteImage(imageId, wrapperElement) {
             reader.readAsDataURL(file);
         });
     }
+    async function edit(id){
+        document.getElementById("ModalEdit").classList.remove("hidden");
+        let url = `{{ route('workorder.getWorkOrder', ':id') }}`.replace(':id', id);
+        let response = await fetch(url);
+        let data = await response.json(); // Recibe los datos en JSON
+        console.log(data);
+
+        document.getElementById('work_order_id_update').value = data.workOrder.id;
+        document.getElementById('empresa').value = data.workOrder.empresa;
+        document.getElementById('order_work').value = data.workOrder.order_work;
+
+        // Seleccionar los operarios
+        const workerSelect = document.getElementById('workers');
+        if (data.workers && Array.isArray(data.workers)) {
+            data.workers.forEach(worker => {
+                const option = workerSelect.querySelector(`option[value="${worker.worker_id}"]`);
+                if (option) {
+                    option.selected = true;
+                }
+            });
+        }
+        // Seleccionar los supervisores
+        const SupervisorSelect = document.getElementById('supervisor_id');
+        if (data.workOrderSupervisors && Array.isArray(data.workOrderSupervisors)) {
+            data.workOrderSupervisors.forEach(supervisor => {
+                const option = SupervisorSelect.querySelector(`option[value="${supervisor.supervisor_id}"]`);
+                if (option) {
+                    option.selected = true;
+                }
+            });
+        }
+        // Seleccionar los jefes
+        const maintenanceManagerSelect = document.getElementById('maintenance_manager_id');
+        if (data.workOrderMaintenanceManagers && Array.isArray(data.workOrderMaintenanceManagers)) {
+            data.workOrderMaintenanceManagers.forEach(maintenanceManager => {
+                const option = maintenanceManagerSelect.querySelector(`option[value="${maintenanceManager.maintenance_manager_id}"]`);
+                if (option) {
+                    option.selected = true;
+                }
+            });
+        }
+         // Mostrar la imagen si existe
+    const imagenBloque = document.querySelector('#ModalEdit .imagen-bloque'); // Selecciona el contenedor de la imagen en el modal
+    const previewImagen = document.getElementById('previewImagen'); // El div para la vista previa
+
+    // Limpiar cualquier vista previa anterior
+    previewImagen.innerHTML = '';
+
+    if (data.workOrder.image_path) {
+        const imagePreview = document.createElement('img');
+        imagePreview.src = `/storage/${data.workOrder.image_path}`; // Asegúrate de que la ruta sea correcta
+        imagePreview.classList.add('w-full', 'h-40', 'object-cover', 'rounded', 'shadow', 'mb-2'); // Clases de Tailwind para estilo
+
+        // Crear un contenedor para la imagen y la descripción (si la tienes)
+        const previewContainer = document.createElement('div');
+        previewContainer.classList.add('mb-4', 'p-2', 'border', 'rounded', 'bg-gray-50');
+        previewContainer.appendChild(imagePreview);
+
+        // Si también quieres mostrar la descripción existente
+        if (data.workOrder.descripcion) {
+            const descriptionLabel = document.createElement('label');
+            descriptionLabel.classList.add('block', 'text-sm', 'text-gray-700', 'mb-1');
+            descriptionLabel.textContent = 'Descripción del Logo:';
+
+            const descriptionTextarea = document.createElement('textarea');
+            descriptionTextarea.name = 'descripcion';
+            descriptionTextarea.rows = 2;
+            descriptionTextarea.classList.add('w-full', 'border', 'rounded', 'p-1', 'text-sm', 'resize-none');
+            descriptionTextarea.value = data.workOrder.descripcion;
+
+            previewContainer.appendChild(descriptionLabel);
+            previewContainer.appendChild(descriptionTextarea);
+        }
+
+        previewImagen.appendChild(previewContainer);
+    } else {
+        // Si no hay imagen, puedes mostrar un mensaje o dejar el área vacía
+        const noImageMessage = document.createElement('p');
+        noImageMessage.textContent = 'No hay imagen adjunta.';
+        previewImagen.appendChild(noImageMessage);
+    }
+    }
     function addImageWork(event) {
     const preview = document.getElementById('imageContainer');
     // preview.innerHTML = ''; // NO BORRAR las vistas previas anteriores
@@ -511,7 +693,9 @@ async function deleteImage(imageId, wrapperElement) {
         document.addEventListener('DOMContentLoaded', () => {
             all();
 
-            function all() {
+
+        });
+        function all() {
                 const btnBuscar = document.getElementById('btnBuscar');
                 const tableBody = document.getElementById('tbody');
                 fetch(
@@ -544,16 +728,14 @@ async function deleteImage(imageId, wrapperElement) {
                                                     onclick="pdf(${order_work.id})">
                                                 <i class="bi bi-file-earmark-pdf-fill text-red-600 text-xl"></i>
                                                 </button>
-                                            <a href="/workorder/${order_work.id}/edit" class="text-indigo-600 hover:text-indigo-900 "><i class="bi bi-pencil-square"></i> </a>
-                                            <form action="/workorder/${order_work.id}" method="POST" style="display: inline;">
-                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                <input type="hidden" name="_method" value="DELETE">
-                                                <button type="submit" class="text-red-600 hover:text-red-900"
-                                                    onclick="return confirm('¿Estás seguro de que deseas eliminar?');">
-                                                    <i class="bi bi-trash-fill"></i>
+                                                 <button type="button" class="text-red-600 hover:text-red-900"
+                                                    onclick="edit(${order_work.id})">
+                                                <i class="bi bi-pencil-square"></i>
                                                 </button>
-                                                
-                                            </form>
+                                                 <button type="button" class="text-red-600 hover:text-red-900"
+                                                    onclick="destroy(${order_work.id})">
+                                                <i class="bi bi-trash-fill"></i>
+                                                </button>
                                         </td>
                                     </tr>
                                 `;
@@ -570,7 +752,6 @@ async function deleteImage(imageId, wrapperElement) {
                     })
                     .catch(error => console.error('Error en la búsqueda:', error));
             }
-        });
         document.getElementById('formWorkOrderImages').addEventListener('submit', function(e) {
         e.preventDefault();
         let formData = new FormData(this);

@@ -36,5 +36,7 @@ Route::get('/workorder/pdf/{id}', [WorkOrderController::class, 'pdf'])->name('wo
 Route::get('/workorder/{id}/images', [WorkOrderController::class, 'images'])->name('workorder.images');
 Route::delete('/workorder/images/{id}', [WorkOrderController::class, 'destroyImage'])->name('workorder.images.delete');
 Route::post('workorder/images/update', [WorkOrderController::class, 'updateImage'])->name('workorder.updateImage');
+Route::delete('/workorder/delete/destroyWork', [WorkOrderController::class, 'destroyWork'])->name('workorders.destroyWork');
+Route::get('/workorder/{id}', [WorkOrderController::class, 'getWorkOrder'])->name('workorder.getWorkOrder');
 
 require __DIR__.'/auth.php';

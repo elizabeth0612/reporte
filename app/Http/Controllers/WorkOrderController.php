@@ -22,8 +22,26 @@ class WorkOrderController extends Controller
      */
     public function index()
     {
-        return view('workorder.index');
+        $maintenanceManagers = MaintenanceManager::all();
+        $supervisors = Supervisor::all();
+        $workers = Worker::all();
+        return view('workorder.index',compact('maintenanceManagers','supervisors','workers'));
     }
+    public function getWorkOrder($id)
+    {
+        $workOrder = WorkOrder::find($id);
+        $workOrderWorker = WorkOrderWorker::where('work_order_id', $id)->get();
+        $workOrderSupervisor = WorkOrderSupervisor::where('work_order_id', $id)->get();
+        $workOrderMaintenanceManager = WorkOrderMaintenanceManager::where('work_order_id', $id)->get();
+
+        return response()->json([
+            'workOrder' => $workOrder,
+            'workers' => $workOrderWorker,
+            'workOrderSupervisors'=> $workOrderSupervisor,
+            'workOrderMaintenanceManagers'=> $workOrderMaintenanceManager,
+        ]);
+    }
+
     public function updateImage(Request $request){
         try {
             // 1. Actualizar descripciones de imágenes ya guardadas
@@ -312,6 +330,15 @@ class WorkOrderController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
+    {
+        $workOrderDetail = WorkOrder::findOrFail($id);
+        $workOrderDetail->delete();
+
+        return response()->json([
+            'message' => 'Orden de trabajo eliminado con éxito.',
+        ], 200);
+    }
+    public function destroyWork(string $id)
     {
         $workOrderDetail = WorkOrderDetail::findOrFail($id);
         $workOrderDetail->delete();
