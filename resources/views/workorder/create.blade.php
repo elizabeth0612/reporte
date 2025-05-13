@@ -5,7 +5,7 @@
     </x-slot>
     <div class="max-w-6xl mx-auto px-6 py-10 bg-white shadow-md rounded-2xl">
         <h2 class="text-xl font-bold text-gray-800 mb-6">📋 Registro de Orden de Trabajo</h2>
-    
+
         @if ($errors->any())
             <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
                 <ul>
@@ -15,7 +15,7 @@
                 </ul>
             </div>
         @endif
-    
+
         <form action="{{ route('workorders.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700" id="formOrder">
             @csrf
             <div class="md:col-span-2">
@@ -23,16 +23,16 @@
                 <textarea id="empresa" name="empresa" rows="2"
                           class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 resize-none">{{ old('empresa') }}</textarea>
             </div>
-    
+
             <div class="md:col-span-2">
                 <label for="order_work" class="block font-medium mb-1">Orden de Trabajo</label>
                 <textarea id="order_work" name="order_work" rows="2"
                           class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 resize-none">{{ old('order_work') }}</textarea>
             </div>
-    
+
             <div>
                 <label for="supervisor_id" class="block font-medium mb-1">Responsable</label>
-                <select id="supervisor_id" name="supervisor_id[]" 
+                <select id="supervisor_id" name="supervisor_id[]"
                         class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400" multiple>
                     <option value="">-- Seleccionar --</option>
                     <!-- Aquí agregas las opciones, por ejemplo, usando un bucle de Laravel -->
@@ -41,8 +41,8 @@
                     @endforeach
                 </select>
             </div>
-            
-    
+
+
             <div>
                 <label for="maintenance_manager_id" class="block font-medium mb-1">Jefe de mantenimiento</label>
                 <select id="maintenance_manager_id" name="maintenance_manager_id[]"
@@ -54,11 +54,11 @@
                     @endforeach
                 </select>
             </div>
-            
-    
+
+
             <div>
                 <label for="workers" class="block font-medium mb-1">Operarios</label>
-                <select id="workers" name="workers[]" 
+                <select id="workers" name="workers[]"
                         class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400" multiple>
                     <option value="">-- Seleccionar --</option>
                     <!-- Aquí agregas las opciones, por ejemplo, usando un bucle de Laravel -->
@@ -67,10 +67,12 @@
                     @endforeach
                 </select>
             </div>
-            <div class="imagen-bloque">
-                <input type="file" name="imagen" accept="image/*" onchange="handleFileSelect(event)">
+           <div class="imagen-bloque">
+                <label for="" class="block font-medium mb-1">Solo se aceptan imagenes con extension .jpg .jpeg .png</label>
+                <br>
+                <input type="file" name="imagen" accept=".jpg, .jpeg, .png" onchange="handleFileSelect(event)">
             </div>
-            
+
             <!-- Vista previa de la imagen -->
             <div id="previewImagen" class="mt-4"></div>
             <div class="md:col-span-2">
@@ -79,12 +81,12 @@
                     💾 Guardar
                 </button>
             </div>
-           
+
         </form>
     </div>
-    
-    
-    
+
+
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script>
       function handleFileSelect(event) {
@@ -92,8 +94,28 @@
     preview.innerHTML = ''; // Limpiar vista previa anterior
 
     const file = event.target.files[0]; // Solo tomamos el primer archivo
+
+    // Verificar si hay un archivo y si es una imagen
     if (!file || !file.type.startsWith('image/')) return;
 
+    // Definir extensiones permitidas
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    const fileExtension = file.name.split('.').pop().toLowerCase(); // Obtener la extensión del archivo
+
+    // Validar la extensión del archivo
+    if (!allowedExtensions.includes(fileExtension)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'error!',
+                text: 'Solo archivos con las extensiones .jpg, .jpeg o .png',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        event.target.value = ''; // Limpiar el campo de entrada
+        return; // Detener la ejecución si el archivo no es válido
+    }
+
+    // Crear la vista previa de la imagen
     const reader = new FileReader();
     reader.onload = function (e) {
         const container = document.createElement('div');
@@ -153,16 +175,19 @@
                     });
                 }
 
+
                 return response.json();
             })
             .then(data => {
+                 const preview = document.getElementById('previewImagen');
+                 preview.innerHTML = ''; // Limpiar vista previa anterior
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
                         title: '¡Éxito!',
                         text: data.message,
                         showConfirmButton: false,
-                        timer: 2000
+                        timer: 1000
                     });
                     document.getElementById('formOrder').reset();
                 }

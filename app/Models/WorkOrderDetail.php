@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class WorkOrderDetail extends Model
 {
     use HasFactory;
-    protected $fillable = ['work_order_id','nro_trabajo','descripcion','materiales','herramientas','observaciones'];
+    protected $fillable = ['work_order_id','nro_trabajo','descripcion','materiales','herramientas','fechas'];
     public function images()
     {
         return $this->hasMany(WorkOrderDetailImage::class);

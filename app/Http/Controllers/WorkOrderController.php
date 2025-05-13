@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Http\Request;
 use App\Models\MaintenanceManager;
@@ -130,7 +131,7 @@ class WorkOrderController extends Controller
         return $pdf->stream('workorder.pdf');
     }
     public function add( Request $request){
-        //dd($request);
+        // dd($request);
          // Validación de los datos (si es necesario)
          try{
             $request->validate([
@@ -139,7 +140,7 @@ class WorkOrderController extends Controller
                 'descripcion' => 'nullable|string',
                 'material' => 'nullable|string',
                 'herramientas' => 'nullable|string',
-                'observaciones' => 'nullable|string',
+                'fechas' => 'nullable',
             ]);
          }catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -153,7 +154,7 @@ class WorkOrderController extends Controller
                 'descripcion' => $request->input('descripcion'),
                 'materiales' => $request->input('material'),
                 'herramientas' => $request->input('herramientas'),
-                'observaciones' => $request->input('observaciones'),
+                'fechas' => collect($request->input('fechas'))->filter()->implode(' '),
             ]);
 
         // Si se suben imágenes, guardarlas
@@ -329,15 +330,27 @@ class WorkOrderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $workOrderDetail = WorkOrder::findOrFail($id);
-        $workOrderDetail->delete();
+   public function destroy(string $id)
+{
+    // Buscar la orden de trabajo
+    $workOrderDetail = WorkOrder::findOrFail($id);
 
-        return response()->json([
-            'message' => 'Orden de trabajo eliminado con éxito.',
-        ], 200);
+    // Obtener la ruta de la imagen asociada
+    $imagePath = $workOrderDetail->image_path;
+
+    // Eliminar la imagen si existe
+    if ($imagePath && Storage::disk('public')->exists($imagePath)) {
+        Storage::disk('public')->delete($imagePath);
     }
+
+    // Eliminar el registro
+    $workOrderDetail->delete();
+
+    return response()->json([
+        'message' => 'Orden de trabajo eliminada con éxito junto con la imagen asociada.',
+    ], 200);
+}
+
     public function destroyWork(string $id)
     {
         $workOrderDetail = WorkOrderDetail::findOrFail($id);

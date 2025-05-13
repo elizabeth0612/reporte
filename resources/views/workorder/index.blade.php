@@ -122,14 +122,23 @@
                     </div>
 
                     <!-- Observaciones -->
-                    <div>
-                        <label for="observaciones" class="block text-sm  text-gray-700">Observaciones</label>
-                        <textarea id="observaciones" name="observaciones" rows="2" class="mt-1 block w-full  border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-                    </div>
+                   <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fechas</label>
+
+                        <div id="fechasContainer" class="space-y-2">
+                            <input type="date" name="fechas[]" class="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2">
+                        </div>
+
+                        <button type="button" id="agregarFecha" class="mt-3 inline-flex items-center px-3 py-2 border border-indigo-500 text-sm font-medium rounded-md text-indigo-500 hover:bg-indigo-50 transition">
+                            + Agregar otra fecha
+                        </button>
+                        </div>
 
                     <!-- Imágenes -->
                     <div class="imagen-bloque">
-                        <input type="file" name="imagenes[]" accept="image/*" onchange="handleFileSelect(event)" multiple>
+                         <label for="" class="block font-medium mb-1">Solo se aceptan imagenes con extension .jpg .jpeg .png</label>
+                            <br>
+                        <input type="file" name="imagenes[]"  accept=".jpg, .jpeg, .png" onchange="handleFileSelect(event)" multiple>
                       </div>
 
                     <!-- Vista previa de imágenes -->
@@ -299,6 +308,27 @@
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
     <script>
+         var swiper = new Swiper('.swiper-container', {
+        slidesPerView: 'auto',
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+    });
+     // agregar mas input fechas
+    document.getElementById('agregarFecha').addEventListener('click', function() {
+        const container = document.getElementById('fechasContainer');
+        const input = document.createElement('input');
+        input.type = 'date';
+        input.name = 'fechas[]';
+        input.className = 'block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2';
+        container.appendChild(input);
+    });
          var swiper = new Swiper('.swiper-container', {
         slidesPerView: 'auto',
         spaceBetween: 20,
@@ -556,31 +586,43 @@ async function deleteImage(imageId, wrapperElement) {
             document.getElementById(id).classList.add('hidden');
         }
         function handleFileSelect(event) {
-        const preview = document.getElementById('previewImagenes');
-        preview.innerHTML = ''; // Limpiar vistas previas anteriores
+    const preview = document.getElementById('previewImagenes');
+    preview.innerHTML = ''; // Limpiar vistas previas anteriores
 
-        const files = event.target.files;
-        if (!files.length) return;
+    const files = event.target.files;
+    if (!files.length) return;
 
-        Array.from(files).forEach((file, index) => {
-            if (!file.type.startsWith('image/')) return;
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const container = document.createElement('div');
-                container.className = 'mb-4 p-2 border rounded bg-gray-50';
+    for (const file of files) {
+        const fileExtension = file.name.split('.').pop().toLowerCase();
 
-                container.innerHTML = `
-                    <img src="${e.target.result}" class="w-full h-40 object-cover rounded shadow mb-2">
-                    <label class="block text-sm text-gray-700 mb-1">Descripción de la imagen:</label>
-                    <textarea name="descripciones[]" rows="2" class="w-full border rounded p-1 text-sm resize-none" placeholder="Escribe una descripción para la imagen ${index + 1}"></textarea>
-                `;
-
-                preview.appendChild(container);
-            };
-            reader.readAsDataURL(file);
-        });
+        if (!allowedExtensions.includes(fileExtension)) {
+            alert('Solo se permiten archivos con las extensiones .jpg, .jpeg o .png');
+            event.target.value = ''; // Limpiar input
+            return; // Salir si hay un archivo inválido
+        }
     }
+
+    // Si todos los archivos son válidos, continuar con la vista previa
+    Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const container = document.createElement('div');
+            container.className = 'mb-4 p-2 border rounded bg-gray-50';
+
+            container.innerHTML = `
+                <img src="${e.target.result}" class="w-full h-40 object-cover rounded shadow mb-2">
+                <label class="block text-sm text-gray-700 mb-1">Descripción de la imagen:</label>
+                <textarea name="descripciones[]" rows="2" class="w-full border rounded p-1 text-sm resize-none" placeholder="Escribe una descripción para la imagen ${index + 1}"></textarea>
+            `;
+
+            preview.appendChild(container);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
     async function edit(id){
         document.getElementById("ModalEdit").classList.remove("hidden");
         let url = `{{ route('workorder.getWorkOrder', ':id') }}`.replace(':id', id);
@@ -840,7 +882,8 @@ async function deleteImage(imageId, wrapperElement) {
             })
             .then(data => {
                 closeModal('ModalAdd');
-
+                const preview = document.getElementById('previewImagenes');
+                preview.innerHTML = ''; // Limpiar vistas previas anteriores
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',

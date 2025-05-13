@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('descripcion')->nullable();        // Lista de materiales usados
             $table->text('materiales')->nullable();        // Lista de materiales usados
             $table->text('herramientas')->nullable();      // Herramientas requeridas
-            $table->text('observaciones')->nullable();     // Observaciones adicionales
+            $table->text('fechas')->nullable();     // Observaciones adicionales
             $table->timestamps();
         });
     }

@@ -111,7 +111,7 @@
                     <th>DESCRIPCIÓN</th>
                     <th>MATERIAL EMPLEADO</th>
                     <th>HERRAMIENTAS</th>
-                    <th>OBSERVACIONES</th>
+                    <th>FECHAS</th>
                 </tr>
             @endif
         </thead>
@@ -127,7 +127,7 @@
                         <td>{{ $work->descripcion ?? 'Sin ubicación' }}</td>
                         <td class="pre-line">{{$work->materiales ?? 'Sin nombre' }}</td>
                         <td class="pre-line">{{$work->herramientas ?? 'Sin nombre' }}</td>
-                        <td>FECHA: {{ $work->observaciones ?? 'Sin nombre' }} </td>
+                        <td>FECHA: {{ $work->fechas ?? 'Sin nombre' }} </td>
                     </tr>
                     @php $rowCount++; @endphp
                 @endforeach
@@ -147,7 +147,7 @@
     @if (isset($workOrderDetail) && is_iterable($workOrderDetail))
         @foreach ($workOrderDetail as $work)
             @php
-                $fechasTexto = $work->observaciones ?? '';
+                $fechasTexto = $work->fechas ?? '';
                 // Convertimos saltos de línea a espacio y luego explotamos
                 $fechas = preg_split('/\s+/', trim(str_replace(["\r\n", "\n", "\r"], ' ', $fechasTexto)));
             @endphp
@@ -156,7 +156,7 @@
                 @if (!empty($fecha))
                     @php
                         // Usamos Carbon para analizar la fecha
-                        $carbonFecha = \Carbon\Carbon::createFromFormat('d/m/Y', $fecha, 'America/Lima');
+                        $carbonFecha = \Carbon\Carbon::createFromFormat('Y-m-d', $fecha, 'America/Lima');
                         $semanaDelAno = $carbonFecha->weekOfYear;
                     @endphp
                     @php
@@ -188,7 +188,7 @@
             @foreach ($trabajos as $trabajo)
                 @php
                     // Establecemos el idioma a español
-                    $diaDeLaSemana = \Carbon\Carbon::createFromFormat('d/m/Y', $trabajo['fecha'])->locale('es')->isoFormat('dddd');
+$diaDeLaSemana = \Carbon\Carbon::createFromFormat('Y-m-d', $trabajo['fecha'])->locale('es')->isoFormat('dddd');
                 @endphp
                 <tr>
                     <td>{{ $diaDeLaSemana }}</td> <!-- Mostramos el día en español -->
