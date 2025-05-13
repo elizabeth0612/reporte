@@ -94,7 +94,7 @@
                 @endforeach
                 @for($i = count($workOrderWorker); $i < 2; $i++)
                     <td></td>
-                    
+
                 @endfor
             </tr>
         </tbody>
@@ -120,7 +120,7 @@
                 @php
                     $rowCount = 0;
                 @endphp
-    
+
                 @foreach ($workOrderDetail as $index => $work)
                     <tr>
                         <td>{{ $work->nro_trabajo ?? 'Sin nombre' }}</td>
@@ -138,7 +138,7 @@
             @endif
         </tbody>
     </table>
-    
+
 
     @php
         $trabajosPorSemana = [];
