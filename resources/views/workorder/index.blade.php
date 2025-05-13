@@ -173,7 +173,7 @@
                                 <th class="px-3 py-2 border">Descripción</th>
                                 <th class="px-3 py-2 border">Material</th>
                                 <th class="px-3 py-2 border">Herramientas</th>
-                                <th class="px-3 py-2 border">Observaciones</th>
+                                <th class="px-3 py-2 border">Fechas</th>
                                 <th class="px-3 py-2 border">Acciones</th>
                             </tr>
                         </thead>
@@ -198,7 +198,7 @@
                 <h2 class="text-xl font-semibold">Editar Orden de Trabajo</h2>
                 <button onclick="closeModal('ModalEdit')" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
             </div>
-            <form action="{{ route('workorders.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700" id="formOrder">
+            <form action="{{ route('workorders.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700" id="formOrderEdit">
                 @csrf
                 <input type="hidden" id="work_order_id_update">
                 <div class="md:col-span-2">
@@ -246,7 +246,7 @@
                     </select>
                 </div>
                 <div class="imagen-bloque">
-                    <input type="file" name="imagen" accept="image/*" onchange="handleFileSelect(event)">
+                    <input type="file" name="imagen" accept=".jpg, .jpeg, .png" onchange="handleFileSelectLogo(event)">
                 </div>
 
                 <!-- Vista previa de la imagen -->
@@ -319,6 +319,68 @@
             el: '.swiper-pagination',
             clickable: true,
         },
+    });
+       document.getElementById('formOrderEdit').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let formData = new FormData(this);
+        let id = document.getElementById('work_order_id_update').value;
+        let descripcion = document.getElementById('descripcion_work').value;
+        formData.append('descripcion', descripcion);
+
+        fetch(`{{ route('workorder.updateWorkOrder', ':id') }}`.replace(':id', id), {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('response', response);
+                if (!response.ok) {
+                    console.log('hola');
+                    return response.json().then(err => {
+                        let errorMessages = '';
+                        console.log(err)
+                        if (err.errors) {
+                            console.log("1")
+                            for (let field in err.errors) {
+                                errorMessages += `${field}: ${err.errors[field].join(', ')}\n`;
+                            }
+                        } else if (err.error) {
+                            console.log("2")
+                            errorMessages = err.error;
+                        } else if (err.errorPago) {
+                            console.log("3")
+                            errorMessages = err.errorPago;
+                        }
+                        console.log(errorMessages)
+
+                        if (errorMessages) {
+                            console.log("4")
+                            Swal.fire({
+                                title: 'Errores de Validación',
+                                text: errorMessages,
+                                icon: 'error',
+                                confirmButtonText: 'Aceptar'
+                            });
+                        }
+
+                        throw new Error('Error en la respuesta del servidor');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
      // agregar mas input fechas
     document.getElementById('agregarFecha').addEventListener('click', function() {
@@ -487,7 +549,24 @@ async function deleteImage(imageId, wrapperElement) {
                     <input type="text" value="${trabajo.herramientas}" id="herramientas_${trabajo.id}" />
                 </td>
                 <td class="px-3 py-2 border">
-                    <input type="text" value="${trabajo.observaciones}" id="observaciones_${trabajo.id}" />
+                    <div id="fechas_${trabajo.id}">
+                        ${trabajo.fechas
+                            ?.split(/\s+/)
+                            .filter(fecha => fecha.trim() !== '')
+                            .map((fecha, idx) => {
+                                const normalizada = fecha.replace(/\//g, '-'); // Asegura el formato YYYY-MM-DD
+                                return `
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <input type="date" value="${normalizada}" name="fecha_${trabajo.id}_${idx}" class="fecha-input border p-1" />
+                                        <button type="button" onclick="removeDateInput(this)" class="text-red-600 hover:text-red-900">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            })
+                            .join('')}
+                        <button type="button" onclick="addDateInput(${trabajo.id})" class="mt-1 inline-flex items-center  border border-indigo-500 text-sm font-medium rounded-md text-indigo-500 hover:bg-indigo-50 transition">Agregar Fecha</button>
+                    </div>
                 </td>
                 <td class="px-3 py-1 whitespace-nowrap text-sx ">
                     <button type="button" class="text-green-600 hover:text-green-900"
@@ -538,6 +617,36 @@ async function deleteImage(imageId, wrapperElement) {
                 alert("Ocurrió un error. Revisa la consola.");
             }
         }
+// Función para agregar un nuevo campo de fecha
+function addDateInput(id) {
+    const fechasDiv = document.getElementById(`fechas_${id}`);
+    const inputCount = fechasDiv.querySelectorAll('input[type="date"]').length;
+
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('flex', 'items-center', 'gap-2', 'mb-1');
+
+    const newDateInput = document.createElement('input');
+    newDateInput.type = 'date';
+    newDateInput.name = `fecha_${id}_${inputCount}`;
+    newDateInput.classList.add('fecha-input', 'border', 'p-1');
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'text-red-600 hover:text-red-900';
+    removeBtn.innerHTML = `<i class="bi bi-x-circle-fill"></i>`;
+    removeBtn.onclick = function () {
+        removeDateInput(removeBtn);
+    };
+
+    wrapper.appendChild(newDateInput);
+    wrapper.appendChild(removeBtn);
+    fechasDiv.insertBefore(wrapper, fechasDiv.lastElementChild); // antes del botón "Agregar Fecha"
+}
+function removeDateInput(button) {
+    const wrapper = button.parentElement;
+    wrapper.remove();
+}
+
 
         async function save(id) {
             try {
@@ -546,7 +655,11 @@ async function deleteImage(imageId, wrapperElement) {
                 const descripcion = document.getElementById(`descripcion_${id}`).value;
                 const materiales = document.getElementById(`materiales_${id}`).value;
                 const herramientas = document.getElementById(`herramientas_${id}`).value;
-                const observaciones = document.getElementById(`observaciones_${id}`).value;
+                const fechasContainer = document.getElementById(`fechas_${id}`);
+                const fechasInputs = fechasContainer.querySelectorAll('input[type="date"]');
+                const fechas = Array.from(fechasInputs)
+                    .map(input => input.value.trim())
+                    .filter(value => value !== '');
 
                 // Enviar los datos actualizados al servidor
                 let url = `{{ route('workorders.update', ':id') }}`.replace(':id', id);
@@ -561,7 +674,7 @@ async function deleteImage(imageId, wrapperElement) {
                         descripcion,
                         materiales,
                         herramientas,
-                        observaciones
+                        fechas
                     })
                 });
 
@@ -586,125 +699,150 @@ async function deleteImage(imageId, wrapperElement) {
             document.getElementById(id).classList.add('hidden');
         }
         function handleFileSelect(event) {
-    const preview = document.getElementById('previewImagenes');
-    preview.innerHTML = ''; // Limpiar vistas previas anteriores
+            const preview = document.getElementById('previewImagenes');
+            preview.innerHTML = ''; // Limpiar vistas previas anteriores
 
-    const files = event.target.files;
-    if (!files.length) return;
+            const files = event.target.files;
+            if (!files.length) return;
 
-    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+            const allowedExtensions = ['jpg', 'jpeg', 'png'];
 
-    for (const file of files) {
-        const fileExtension = file.name.split('.').pop().toLowerCase();
+            // Verificamos todas las extensiones antes de continuar
+            for (const file of files) {
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                if (!allowedExtensions.includes(fileExtension)) {
+                    alert('Solo se permiten archivos con las extensiones .jpg, .jpeg o .png');
+                    event.target.value = ''; // Limpiar input
+                    preview.innerHTML = ''; // También limpiar el preview
+                    return;
+                }
+            }
 
-        if (!allowedExtensions.includes(fileExtension)) {
-            alert('Solo se permiten archivos con las extensiones .jpg, .jpeg o .png');
-            event.target.value = ''; // Limpiar input
-            return; // Salir si hay un archivo inválido
+            // Si todos los archivos son válidos, continuar con la vista previa
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const container = document.createElement('div');
+                    container.className = 'mb-4 p-2 border rounded bg-gray-50';
+
+                    container.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-40 object-cover rounded shadow mb-2" alt="Vista previa ${index + 1}">
+                        <label class="block text-sm text-gray-700 mb-1">Descripción de la imagen:</label>
+                        <textarea name="descripciones[]" rows="2" class="w-full border rounded p-1 text-sm resize-none" placeholder="Escribe una descripción para la imagen ${index + 1}"></textarea>
+                    `;
+
+                    preview.appendChild(container);
+                };
+                reader.readAsDataURL(file);
+            });
         }
-    }
+        function handleFileSelectLogo(event) {
+            const preview = document.getElementById('previewImagen');
+            preview.innerHTML = ''; // Limpiar vistas previas anteriores
 
-    // Si todos los archivos son válidos, continuar con la vista previa
-    Array.from(files).forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const container = document.createElement('div');
-            container.className = 'mb-4 p-2 border rounded bg-gray-50';
+            const files = event.target.files;
+            if (!files.length) return;
 
-            container.innerHTML = `
-                <img src="${e.target.result}" class="w-full h-40 object-cover rounded shadow mb-2">
-                <label class="block text-sm text-gray-700 mb-1">Descripción de la imagen:</label>
-                <textarea name="descripciones[]" rows="2" class="w-full border rounded p-1 text-sm resize-none" placeholder="Escribe una descripción para la imagen ${index + 1}"></textarea>
-            `;
+            const allowedExtensions = ['jpg', 'jpeg', 'png'];
 
-            preview.appendChild(container);
-        };
-        reader.readAsDataURL(file);
+            // Verificamos todas las extensiones antes de continuar
+            for (const file of files) {
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                if (!allowedExtensions.includes(fileExtension)) {
+                    alert('Solo se permiten archivos con las extensiones .jpg, .jpeg o .png');
+                    event.target.value = ''; // Limpiar input
+                    preview.innerHTML = ''; // También limpiar el preview
+                    return;
+                }
+            }
+
+            // Si todos los archivos son válidos, continuar con la vista previa
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const container = document.createElement('div');
+                    container.className = 'mb-4 p-2 border rounded bg-gray-50';
+
+                    container.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-40 object-cover rounded shadow mb-2" alt="Vista previa ${index + 1}">
+                        <label class="block text-sm text-gray-700 mb-1">Descripción de la imagen:</label>
+                        <textarea name="descripcion" id="descripcion_work" rows="2" class="w-full border rounded p-1 text-sm resize-none" placeholder="Escribe una descripción para la imagen ${index + 1}"></textarea>
+                    `;
+
+                    preview.appendChild(container);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+
+   async function edit(id) {
+    document.getElementById("ModalEdit").classList.remove("hidden");
+
+    let url = `{{ route('workorder.getWorkOrder', ':id') }}`.replace(':id', id);
+    let response = await fetch(url);
+    let data = await response.json();
+
+    document.getElementById('work_order_id_update').value = data.workOrder.id;
+    document.getElementById('empresa').value = data.workOrder.empresa;
+    document.getElementById('order_work').value = data.workOrder.order_work;
+
+    // Reset selección múltiple
+    document.querySelectorAll('#supervisor_id option, #maintenance_manager_id option, #workers option').forEach(opt => opt.selected = false);
+
+    // Supervisores
+    data.workOrderSupervisors?.forEach(sup => {
+        const opt = document.querySelector(`#supervisor_id option[value="${sup.supervisor_id}"]`);
+        if (opt) opt.selected = true;
     });
-}
 
-    async function edit(id){
-        document.getElementById("ModalEdit").classList.remove("hidden");
-        let url = `{{ route('workorder.getWorkOrder', ':id') }}`.replace(':id', id);
-        let response = await fetch(url);
-        let data = await response.json(); // Recibe los datos en JSON
-        console.log(data);
+    // Jefes de mantenimiento
+    data.workOrderMaintenanceManagers?.forEach(jefe => {
+        const opt = document.querySelector(`#maintenance_manager_id option[value="${jefe.maintenance_manager_id}"]`);
+        if (opt) opt.selected = true;
+    });
 
-        document.getElementById('work_order_id_update').value = data.workOrder.id;
-        document.getElementById('empresa').value = data.workOrder.empresa;
-        document.getElementById('order_work').value = data.workOrder.order_work;
+    // Operarios
+    data.workers?.forEach(worker => {
+        const opt = document.querySelector(`#workers option[value="${worker.worker_id}"]`);
+        if (opt) opt.selected = true;
+    });
 
-        // Seleccionar los operarios
-        const workerSelect = document.getElementById('workers');
-        if (data.workers && Array.isArray(data.workers)) {
-            data.workers.forEach(worker => {
-                const option = workerSelect.querySelector(`option[value="${worker.worker_id}"]`);
-                if (option) {
-                    option.selected = true;
-                }
-            });
-        }
-        // Seleccionar los supervisores
-        const SupervisorSelect = document.getElementById('supervisor_id');
-        if (data.workOrderSupervisors && Array.isArray(data.workOrderSupervisors)) {
-            data.workOrderSupervisors.forEach(supervisor => {
-                const option = SupervisorSelect.querySelector(`option[value="${supervisor.supervisor_id}"]`);
-                if (option) {
-                    option.selected = true;
-                }
-            });
-        }
-        // Seleccionar los jefes
-        const maintenanceManagerSelect = document.getElementById('maintenance_manager_id');
-        if (data.workOrderMaintenanceManagers && Array.isArray(data.workOrderMaintenanceManagers)) {
-            data.workOrderMaintenanceManagers.forEach(maintenanceManager => {
-                const option = maintenanceManagerSelect.querySelector(`option[value="${maintenanceManager.maintenance_manager_id}"]`);
-                if (option) {
-                    option.selected = true;
-                }
-            });
-        }
-         // Mostrar la imagen si existe
-    const imagenBloque = document.querySelector('#ModalEdit .imagen-bloque'); // Selecciona el contenedor de la imagen en el modal
-    const previewImagen = document.getElementById('previewImagen'); // El div para la vista previa
-
-    // Limpiar cualquier vista previa anterior
+    // Vista previa de imagen
+    const previewImagen = document.getElementById('previewImagen');
     previewImagen.innerHTML = '';
 
     if (data.workOrder.image_path) {
         const imagePreview = document.createElement('img');
-        imagePreview.src = `/storage/${data.workOrder.image_path}`; // Asegúrate de que la ruta sea correcta
-        imagePreview.classList.add('w-full', 'h-40', 'object-cover', 'rounded', 'shadow', 'mb-2'); // Clases de Tailwind para estilo
+        imagePreview.src = `/storage/${data.workOrder.image_path}`;
+        imagePreview.className = 'w-full h-40 object-cover rounded shadow mb-2';
 
-        // Crear un contenedor para la imagen y la descripción (si la tienes)
         const previewContainer = document.createElement('div');
-        previewContainer.classList.add('mb-4', 'p-2', 'border', 'rounded', 'bg-gray-50');
+        previewContainer.className = 'mb-4 p-2 border rounded bg-gray-50';
         previewContainer.appendChild(imagePreview);
 
-        // Si también quieres mostrar la descripción existente
-        if (data.workOrder.descripcion) {
+
             const descriptionLabel = document.createElement('label');
-            descriptionLabel.classList.add('block', 'text-sm', 'text-gray-700', 'mb-1');
+            descriptionLabel.className = 'block text-sm text-gray-700 mb-1';
             descriptionLabel.textContent = 'Descripción del Logo:';
 
             const descriptionTextarea = document.createElement('textarea');
             descriptionTextarea.name = 'descripcion';
+            descriptionTextarea.id = 'descripcion_work';
+
             descriptionTextarea.rows = 2;
-            descriptionTextarea.classList.add('w-full', 'border', 'rounded', 'p-1', 'text-sm', 'resize-none');
+            descriptionTextarea.className = 'w-full border rounded p-1 text-sm resize-none';
             descriptionTextarea.value = data.workOrder.descripcion;
 
             previewContainer.appendChild(descriptionLabel);
             previewContainer.appendChild(descriptionTextarea);
-        }
+
 
         previewImagen.appendChild(previewContainer);
     } else {
-        // Si no hay imagen, puedes mostrar un mensaje o dejar el área vacía
-        const noImageMessage = document.createElement('p');
-        noImageMessage.textContent = 'No hay imagen adjunta.';
-        previewImagen.appendChild(noImageMessage);
+        previewImagen.textContent = 'No hay imagen adjunta.';
     }
-    }
+}
     function addImageWork(event) {
     const preview = document.getElementById('imageContainer');
     // preview.innerHTML = ''; // NO BORRAR las vistas previas anteriores

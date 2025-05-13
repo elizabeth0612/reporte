@@ -304,28 +304,119 @@ class WorkOrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
+
     public function update(Request $request, string $id)
     {
-        //dd($request,$id);
+                // dd($request,$id);
+
     $workOrderDetail = WorkOrderDetail::findOrFail($id);
 
-    // Actualiza los campos con los nuevos valores proporcionados en la solicitud
-        $workOrderDetail->update([
-            'work_order_id' =>  $id,
-            'nro_trabajo' => $request->input('nro_trabajo'),
-            'descripcion' => $request->input('descripcion'),
-            'materiales' => $request->input('materiales'),  // Cambié material a materiales
-            'herramientas' => $request->input('herramientas'),
-            'observaciones' => $request->input('observaciones'),
+    $fechas = collect($request->input('fechas'))->filter()->implode(' '); // convierte el array a string
+
+    $success = $workOrderDetail->update([
+        'id' => $id,
+        'nro_trabajo' => $request->input('nro_trabajo'),
+        'descripcion' => $request->input('descripcion'),
+        'materiales' => $request->input('materiales'),
+        'herramientas' => $request->input('herramientas'),
+        'fechas' => $fechas, // guarda como: "2025-04-30 2025-05-22"
+    ]);
+
+    return response()->json([
+        'success' => $success,
+        'message' => $success ? '¡Ha sido actualizado con éxito!' : 'Error al actualizar.',
+    ]);
+}
+public function updateWorkOrder(Request $request, string $id){
+                //dd($request,$id);
+     try {
+        // Validación
+        $request->validate([
+            'order_work' => 'required|string',
+            'empresa' => 'nullable|string',
+            'descripcion' => 'nullable|string',
+
+            'supervisor_id' => 'nullable|array',
+            'supervisor_id.*' => 'exists:supervisors,id',
+
+            'maintenance_manager_id' => 'nullable|array',
+            'maintenance_manager_id.*' => 'exists:maintenance_managers,id',
+
+            'workers' => 'nullable|array',
+            'workers.*' => 'exists:workers,id',
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json(['errors' => $e->errors()], 422);
+    }
+
+    try {
+        $workOrder = WorkOrder::findOrFail($id);
+                //dd($request->descripcion);
+
+        // Actualizar campos principales
+        $workOrder->update([
+            'order_work' => $request->order_work,
+            'empresa' => $request->empresa,
+            'descripcion' => $request->descripcion,
         ]);
 
-            // Opción para devolver una respuesta, si lo necesitas
-            return response()->json([
-                'success' => true,
-                'message' => '¡Ha sido actualizado con éxito!',
-            ]);
+        // Imagen (si suben una nueva)
+        if ($request->hasFile('imagen')) {
+            $imagen = $request->file('imagen');
+            $imageName = time() . '_' . $imagen->getClientOriginalName();
+            $imagen->move(storage_path('app/public/images/logo'), $imageName);
 
+            $workOrder->update([
+                'image_path' => 'images/logo/' . $imageName,
+            ]);
+        }
+
+        // Actualizar jefes de mantenimiento
+        if ($request->filled('maintenance_manager_id')) {
+            WorkOrderMaintenanceManager::where('work_order_id', $workOrder->id)->delete();
+            foreach ($request->maintenance_manager_id as $managerId) {
+                WorkOrderMaintenanceManager::create([
+                    'work_order_id' => $workOrder->id,
+                    'maintenance_manager_id' => $managerId,
+                ]);
+            }
+        }
+
+        // Actualizar supervisores
+        if ($request->filled('supervisor_id')) {
+            WorkOrderSupervisor::where('work_order_id', $workOrder->id)->delete();
+            foreach ($request->supervisor_id as $supervisorId) {
+                WorkOrderSupervisor::create([
+                    'work_order_id' => $workOrder->id,
+                    'supervisor_id' => $supervisorId,
+                ]);
+            }
+        }
+
+        // Actualizar trabajadores
+        if ($request->filled('workers')) {
+            WorkOrderWorker::where('work_order_id', $workOrder->id)->delete();
+            foreach ($request->workers as $workerId) {
+                WorkOrderWorker::create([
+                    'work_order_id' => $workOrder->id,
+                    'worker_id' => $workerId,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => '¡La orden de trabajo ha sido actualizada con éxito!',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar la orden de trabajo',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+
+}
 
     /**
      * Remove the specified resource from storage.
