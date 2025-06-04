@@ -56,8 +56,7 @@
                     <tr>
 
                         <th class="px-3 py-1 text-left text-xs  text-gray-500 uppercase tracking-wider">
-                            ORDEN DE TRABAJO
-
+                            MES
                         </th>
                         <th class="px-3 py-1 text-left text-xs  text-gray-500 uppercase tracking-wider">
                             Empresa
@@ -479,14 +478,14 @@ async function deleteImage(imageId, wrapperElement) {
 }
 
 
-    async function destroy(id) {
+    async function destroyWork(id) {
     try {
         // Confirmación antes de eliminar
-        const confirmation = confirm("¿Estás seguro de que deseas eliminar este detalle?");
+        const confirmation = confirm("¿Estás seguro de que deseas eliminar este trabajo?");
         if (!confirmation) return; // Si el usuario cancela, no hacer nada
 
         // Definir la URL para la solicitud DELETE
-        let url = `{{ route('workorders.destroyWork', ':id') }}`.replace(':id', id);
+        let url = `{{ route('workorder.destroyWork', ':id') }}`.replace(':id', id);
 
         // Enviar la solicitud DELETE al servidor
         let response = await fetch(url, {
@@ -574,7 +573,7 @@ async function deleteImage(imageId, wrapperElement) {
                         <i class="bi bi-save"></i>
                     </button>
                      <button type="submit" class="text-red-600 hover:text-red-900"
-                        onclick="destroy(${trabajo.id})">
+                        onclick="destroyWork(${trabajo.id})">
                         <i class="bi bi-trash-fill"></i>
                     </button>
                     <button type="button" class="text-red-600 hover:text-red-900"
@@ -892,7 +891,7 @@ function removeDateInput(button) {
                                 rowsHtml += `
                                     <tr>
                                         <td class="px-3 py-1 whitespace-nowrap text-sx  text-gray-900">
-                                            ${order_work.order_work ?? ''}
+                                            ${order_work.mes_work ?? ''}
                                         </td>
                                         <td class="px-3 py-1 whitespace-nowrap text-sx  text-gray-900">${order_work.empresa ?? ''}</td>
                                         <td class="px-3 py-1 whitespace-nowrap text-sx ">

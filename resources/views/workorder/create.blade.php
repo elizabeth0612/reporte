@@ -25,9 +25,9 @@
             </div>
 
             <div class="md:col-span-2">
-                <label for="order_work" class="block font-medium mb-1">Orden de Trabajo</label>
-                <textarea id="order_work" name="order_work" rows="2"
-                          class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 resize-none">{{ old('order_work') }}</textarea>
+                <label for="mes_work" class="block font-medium mb-1">Mes y Año</label>
+                <textarea id="mes_work" name="mes_work" rows="2"
+                          class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-400 resize-none">{{ old('mes_work') }}</textarea>
             </div>
 
             <div>

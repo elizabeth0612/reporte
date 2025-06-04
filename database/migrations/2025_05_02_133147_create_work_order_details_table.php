@@ -19,6 +19,13 @@ return new class extends Migration
             $table->text('materiales')->nullable();        // Lista de materiales usados
             $table->text('herramientas')->nullable();      // Herramientas requeridas
             $table->text('fechas')->nullable();     // Observaciones adicionales
+            $table->unsignedBigInteger('user_register')->nullable();
+            $table->foreign('user_register')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_update')->nullable();
+            $table->foreign('user_update')->references('id')->on('users')->onDelete('cascade');
+            $table->boolean('status')->default(1);
+            $table->timestamp('fecha_registro')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('fecha_actualizacion')->default(DB::raw('CURRENT_TIMESTAMP'))->onUpdate(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamps();
         });
     }

@@ -8,9 +8,23 @@ use Illuminate\Database\Eloquent\Model;
 class WorkOrderDetail extends Model
 {
     use HasFactory;
-    protected $fillable = ['work_order_id','nro_trabajo','descripcion','materiales','herramientas','fechas'];
+    protected $fillable = ['work_order_id','nro_trabajo','descripcion','materiales','herramientas','fechas','user_register'];
     public function images()
     {
         return $this->hasMany(WorkOrderDetailImage::class);
     }
+      public function user()
+        {
+            return $this->belongsTo(User::class,'user_register');
+        }
+        protected static function booted()
+        {
+            static::creating(function ($model) {
+                $model->user_register = auth()->id();
+            });
+            static::updating(function ($model) {
+                $model->user_update = auth()->id();
+            });
+        }
+
 }

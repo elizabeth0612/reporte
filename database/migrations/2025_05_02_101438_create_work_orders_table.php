@@ -14,9 +14,16 @@ return new class extends Migration
         Schema::create('work_orders', function (Blueprint $table) {
             $table->id();
             $table->string('empresa')->nullable();
-            $table->string('order_work')->nullable(); // orden de trabajo
+            $table->string('mes_work')->nullable(); // orden de trabajo
             $table->string('image_path')->nullable();  // Ruta de la imagen
             $table->string('descripcion')->nullable();  // Ruta de la imagen
+            $table->unsignedBigInteger('user_register')->nullable();
+            $table->foreign('user_register')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_update')->nullable();
+            $table->foreign('user_update')->references('id')->on('users')->onDelete('cascade');
+            $table->boolean('status')->default(1);
+            $table->timestamp('fecha_registro')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('fecha_actualizacion')->default(DB::raw('CURRENT_TIMESTAMP'))->onUpdate(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamps();
         });
     }

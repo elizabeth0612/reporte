@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
-
+use Intervention\Image\ImageManager;
 use Illuminate\Http\Request;
 use App\Models\MaintenanceManager;
 use App\Models\Supervisor;
@@ -15,6 +15,8 @@ use App\Models\WorkOrderDetailImage;
 use App\Models\WorkOrderDetail;
 use App\Models\WorkOrderMaintenanceManager;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Intervention\Image\Facades\Image; // ¡Asegúrate de que este Facade esté aquí!
+
 
 class WorkOrderController extends Controller
 {
@@ -110,14 +112,37 @@ class WorkOrderController extends Controller
         return response()->json($workOrderDetail);
 
     }
+    //  public function pdf($id){
+    //     $workOrder = WorkOrder::find($id);
+    //     if (!$workOrder) {
+    //         return abort(404, 'order no encontrada');
+    //     }
+    //     $workOrderMaintenanceManager = WorkOrderMaintenanceManager::with('maintenanceManager')
+    //     ->where('work_order_id', $id)
+    //     ->get();
+
+    //     $workOrderSupervisor = WorkOrderSupervisor::with('supervisor')
+    //         ->where('work_order_id', $id)
+    //         ->get();
+
+    //     $workOrderWorker = WorkOrderWorker::with('worker')
+    //         ->where('work_order_id', $id)
+    //         ->get();
+    //     $workOrderDetail = WorkOrderDetail::with('images')->where('work_order_id', $id)->get();
+    //     $pdf = Pdf::loadView('workorder.pdf', compact('workOrder','workOrderMaintenanceManager','workOrderSupervisor','workOrderWorker','workOrderDetail'));
+    //     return $pdf->stream('workorder.pdf');
+    // }
     public function pdf($id){
+        set_time_limit(1000); // 300 segundos = 5 minutos
+
         $workOrder = WorkOrder::find($id);
         if (!$workOrder) {
-            return abort(404, 'order no encontrada');
+            return abort(404, 'Orden de trabajo no encontrada');
         }
+
         $workOrderMaintenanceManager = WorkOrderMaintenanceManager::with('maintenanceManager')
-        ->where('work_order_id', $id)
-        ->get();
+            ->where('work_order_id', $id)
+            ->get();
 
         $workOrderSupervisor = WorkOrderSupervisor::with('supervisor')
             ->where('work_order_id', $id)
@@ -126,10 +151,26 @@ class WorkOrderController extends Controller
         $workOrderWorker = WorkOrderWorker::with('worker')
             ->where('work_order_id', $id)
             ->get();
-        $workOrderDetail = WorkOrderDetail::with('images')->where('work_order_id', $id)->get();
-        $pdf = Pdf::loadView('workorder.pdf', compact('workOrder','workOrderMaintenanceManager','workOrderSupervisor','workOrderWorker','workOrderDetail'));
+
+        $workOrderDetail = WorkOrderDetail::with('images', 'user')
+            ->where('work_order_id', $id)
+            ->get();
+
+
+        $pdf = Pdf::loadView('workorder.pdf', compact(
+            'workOrder',
+            'workOrderMaintenanceManager',
+            'workOrderSupervisor',
+            'workOrderWorker',
+            'workOrderDetail'
+        ));
+
+
+
         return $pdf->stream('workorder.pdf');
-    }
+}
+
+
     public function add( Request $request){
         // dd($request);
          // Validación de los datos (si es necesario)
@@ -200,7 +241,7 @@ class WorkOrderController extends Controller
         //dd($request);
         try{
             $request->validate([
-                'order_work' => 'required|string',
+                'mes_work' => 'required|string',
                 'empresa' => 'nullable|string',
                 'descripcion' => 'nullable|string',
 
@@ -221,7 +262,7 @@ class WorkOrderController extends Controller
             //DB::beginTransaction();
 
             $workOrder = WorkOrder::create([
-                'order_work' => $request->order_work,
+                'mes_work' => $request->mes_work,
                 'empresa' => $request->empresa,
                 'descripcion'=> $request->descripcion,
 

@@ -16,7 +16,13 @@ return new class extends Migration
             $table->string('name', 100)->index()->nullable();
             $table->string('paternal_surname', 100)->nullable();
             $table->string('maternal_surname', 100)->nullable();
+            $table->unsignedBigInteger('user_register')->nullable();
+            $table->foreign('user_register')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_update')->nullable();
+            $table->foreign('user_update')->references('id')->on('users')->onDelete('cascade');
             $table->boolean('status')->default(1);
+            $table->timestamp('fecha_registro')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('fecha_actualizacion')->default(DB::raw('CURRENT_TIMESTAMP'))->onUpdate(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamps();
         });
     }

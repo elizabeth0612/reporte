@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             WorkerSeeder::class,
             MaintenanceManagerSeeder::class,
             SupervisorSeeder::class,
+            RolesAndPermissionsSeeder::class,
         ]);
     }
 }

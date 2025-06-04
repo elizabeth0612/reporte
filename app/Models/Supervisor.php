@@ -8,6 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class Supervisor extends Model
 {
     use HasFactory;
-    
-    protected $fillable = ['name','status','paternal_surname' ,'maternal_surname'];
+
+    protected $fillable = ['name','status','paternal_surname' ,'maternal_surname','user_register','user_update'];
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_register');
+    }
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            $model->user_register = auth()->id();
+        });
+        static::updating(function ($model) {
+            $model->user_update = auth()->id();
+        });
+    }
 }
