@@ -108,14 +108,14 @@
         <thead>
             @if (isset($workOrderDetail) && is_iterable($workOrderDetail) && $workOrderDetail->isNotEmpty())
                 <tr>
-                    <th colspan="6">DESCRIPCIÓN DE LOS TRABAJOS</th>
+                    <th colspan="5">DESCRIPCIÓN DE LOS TRABAJOS</th>
                 </tr>
                 <tr class="subencabezado">
                     <th>N.º TRABAJO</th>
                     <th>DESCRIPCIÓN</th>
                     <th>MATERIAL EMPLEADO</th>
                     <th>HERRAMIENTAS</th>
-                    <th>HORAS</th>
+                    {{--  <th>HORAS</th>  --}}
                     <th>FECHAS</th>
                 </tr>
             @endif
@@ -128,7 +128,7 @@
                         <td>{{ $work->descripcion ?? 'Sin descripción' }}</td>
                         <td class="pre-line">{{ $work->materiales ?? 'Sin materiales' }}</td>
                         <td class="pre-line">{{ $work->herramientas ?? 'Sin herramientas' }}</td>
-                        <td class="pre-line"> {{ count($workOrderWorker) * 8 }}</td>
+                        {{--  <td class="pre-line"> {{ count($workOrderWorker) * 8 }}</td>  --}}
                         <td>{{ $work->fechas ?? 'Sin fecha' }}</td>
                     </tr>
                 @endforeach
@@ -148,7 +148,7 @@
                 </tr>
                 <tr class="subencabezado">
                     <th>N.º TRABAJO</th>
-                    <th>Operario</th>
+                    <th>OFICIAL</th>
                 </tr>
             @endif
         </thead>
@@ -157,7 +157,8 @@
                 @foreach ($workOrderDetail as $work)
                     <tr>
                         <td>{{ $work->nro_trabajo ?? 'Sin número' }}</td>
-                        <td>{{ $work->user->name ?? 'Sin usuario registrado'}}</td>
+                        {{--  <td>{{ $work->user->name ?? 'Sin usuario registrado'}}</td>  --}}
+                        <td>OFICIAL</td>
                     </tr>
                 @endforeach
             @else
