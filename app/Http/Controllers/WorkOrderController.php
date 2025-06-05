@@ -172,6 +172,8 @@ class WorkOrderController extends Controller
 
 
     public function add( Request $request){
+        // dd(auth()->check(), auth()->id());
+
         // dd($request);
          // Validación de los datos (si es necesario)
          try{
