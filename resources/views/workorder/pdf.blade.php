@@ -157,7 +157,7 @@
                 @foreach ($workOrderDetail as $work)
                     <tr>
                         <td>{{ $work->nro_trabajo ?? 'Sin número' }}</td>
-                        <td>{{ $work->user->name}}</td>
+                        <td>{{ $work->user->name ?? 'Sin usuario registrado'}}</td>
                     </tr>
                 @endforeach
             @else
